@@ -8,7 +8,7 @@ ENVIRONMENT = "production"
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "forum-database"
-database_id = "your-database-id-here"
+database_id = "134219ce-af5b-44fe-91e7-629c6ba4e910"
 
 [env.development.vars]
 ENVIRONMENT = "development"
@@ -16,11 +16,11 @@ ENVIRONMENT = "development"
 [[env.development.d1_databases]]
 binding = "DB"
 database_name = "forum-database"
-database_id = "your-database-id-here"
+database_id = "134219ce-af5b-44fe-91e7-629c6ba4e910"
 
 # CORS settings
 [env.production.vars.CORS_ORIGIN]
-value = "https://your-frontend-domain.pages.dev"
+value = "https://forum1.pages.dev/"
 
 [env.development.vars.CORS_ORIGIN]
 value = "*"
