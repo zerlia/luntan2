@@ -39,7 +39,7 @@ app.onError((err, c) => {
 
 // Auth Middleware
 app.use('/api/*', async (c, next) => {
-  if (c.req.path.startsWith("/api/auth") || c.req.path.startsWith("/api/init-db")) {
+  if (c.req.path.startsWith('/api/auth')) {
     return next();
   }
   try {
@@ -86,16 +86,3 @@ app.get('/', (c) => {
 
 export default app;
 
-
-
-// Endpoint to manually trigger database initialization and seeding
-app.get("/api/init-db", async (c) => {
-  try {
-    await initDb(c.env.DB);
-    await seedData(c.env.DB);
-    return c.json({ message: "Database initialized and seeded successfully!" });
-  } catch (e) {
-    console.error("Error initializing or seeding database:", e);
-    throw new HTTPException(500, { message: "Failed to initialize or seed database." });
-  }
-});
