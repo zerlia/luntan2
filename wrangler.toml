@@ -1,0 +1,27 @@
+name = "cloudflare-forum-worker"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "forum-database"
+database_id = "your-database-id-here"
+
+[env.development.vars]
+ENVIRONMENT = "development"
+
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "forum-database"
+database_id = "your-database-id-here"
+
+# CORS settings
+[env.production.vars.CORS_ORIGIN]
+value = "https://your-frontend-domain.pages.dev"
+
+[env.development.vars.CORS_ORIGIN]
+value = "*"
+

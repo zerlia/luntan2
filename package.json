@@ -1,0 +1,21 @@
+{
+  "name": "cloudflare-forum-worker",
+  "version": "1.0.0",
+  "description": "Forum backend using Cloudflare Workers and D1",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "start": "wrangler dev"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "typescript": "^5.0.0",
+    "wrangler": "^3.0.0"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "bcryptjs": "^2.4.3"
+  }
+}
+
