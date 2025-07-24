@@ -104,7 +104,13 @@ authRoutes.post('/admin/login', async (c) => {
   }
 
   const token = await sign({ id: adminAccount.id, username: adminAccount.username, role: 'admin' }, c.env.JWT_SECRET || 'default-secret');
-
-  return c.json({ token });
+  return c.json({
+    token,
+    user: {
+      id: adminAccount.id,
+      username: adminAccount.username,
+      role: 'admin'
+    }
+  });;
 });
 
