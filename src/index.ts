@@ -15,7 +15,7 @@ interface Env {
   CORS_ORIGIN: string;
 }
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env }>( );
 
 // CORS Middleware
 app.use('*', async (c, next) => {
@@ -50,7 +50,8 @@ app.onError((err, c) => {
 
 // Auth Middleware
 app.use('/api/*', async (c, next) => {
-  if (c.req.path.startsWith('/api/auth')) {
+  // Allow auth routes to bypass token verification
+  if (c.req.path.startsWith('/api/auth/login') || c.req.path.startsWith('/api/auth/register') || c.req.path.startsWith('/api/auth/admin/login')) {
     return next();
   }
   try {
@@ -96,5 +97,3 @@ app.get('/', (c) => {
 });
 
 export default app;
-
-
