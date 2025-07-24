@@ -19,8 +19,9 @@ const app = new Hono<{ Bindings: Env }>();
 
 // CORS Middleware
 app.use('*', async (c, next) => {
+  const corsOrigin = c.env.CORS_ORIGIN || '*';
   const corsMiddleware = cors({
-    origin: c.env.CORS_ORIGIN ? c.env.CORS_ORIGIN.split(',') : ['*'], // Allow multiple origins
+    origin: corsOrigin.split(',').map(origin => origin.trim()),
     allowHeaders: ['Content-Type', 'Authorization'],
     allowMethods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'],
     maxAge: 86400,
@@ -30,11 +31,21 @@ app.use('*', async (c, next) => {
 
 // Global Error Handler
 app.onError((err, c) => {
+  console.error('Error details:', {
+    message: err.message,
+    stack: err.stack,
+    path: c.req.path,
+    method: c.req.method
+  });
+  
   if (err instanceof HTTPException) {
     return err.getResponse();
   }
-  console.error(`${err}`);
-  return c.json({ error: 'Internal Server Error' }, 500);
+  
+  return c.json({ 
+    error: 'Internal Server Error',
+    details: c.env.ENVIRONMENT === 'development' ? err.message : undefined
+  }, 500);
 });
 
 // Auth Middleware
@@ -85,4 +96,5 @@ app.get('/', (c) => {
 });
 
 export default app;
+
 
