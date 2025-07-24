@@ -19,9 +19,6 @@ const app = new Hono<{ Bindings: Env }>();
 
 // CORS Middleware
 app.use('*', async (c, next) => {
-  // 在這裡添加 console.log 語句
-  console.log("CORS_ORIGIN from env:", c.env.CORS_ORIGIN);
-  
   const corsMiddleware = cors({
     origin: c.env.CORS_ORIGIN ? c.env.CORS_ORIGIN.split(',') : ['*'], // Allow multiple origins
     allowHeaders: ['Content-Type', 'Authorization'],
