@@ -17,29 +17,8 @@ interface Env {
 
 const app = new Hono<{ Bindings: Env }>();
 
-
-// 直接處理所有 OPTIONS 請求，確保CORS頭被正確設置
-app.options('*', (c) => {
-  console.log("OPTIONS request received, CORS_ORIGIN:", c.env.CORS_ORIGIN);
-  
-  // 手動設置CORS響應頭
-  c.header('Access-Control-Allow-Origin', 'https://forum1.pages.dev/' );
-  c.header('Access-Control-Allow-Methods', 'POST,GET,PUT,DELETE,OPTIONS');
-  c.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  c.header('Access-Control-Max-Age', '86400');
-  
-  return c.text('', 204);
-});
-
-
-
-
-
 // CORS Middleware
 app.use('*', async (c, next) => {
-  // 在這裡添加 console.log 語句
-  console.log("CORS_ORIGIN from env:", c.env.CORS_ORIGIN);
-  
   const corsMiddleware = cors({
     origin: c.env.CORS_ORIGIN ? c.env.CORS_ORIGIN.split(',') : ['*'], // Allow multiple origins
     allowHeaders: ['Content-Type', 'Authorization'],
