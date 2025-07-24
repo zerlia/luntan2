@@ -6,7 +6,7 @@ export async function initDb(db: D1Database): Promise<void> {
   }
   
   try {
-    // Create tables if they don\'t exist
+    // Create tables if they don't exist
     await db.exec(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -15,8 +15,7 @@ export async function initDb(db: D1Database): Promise<void> {
         role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')),
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
-    `);
-    await db.exec(`
+
       CREATE TABLE IF NOT EXISTS posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -28,8 +27,7 @@ export async function initDb(db: D1Database): Promise<void> {
         last_modified_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users (id)
       );
-    `);
-    await db.exec(`
+
       CREATE TABLE IF NOT EXISTS comments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         content TEXT NOT NULL,
@@ -40,8 +38,7 @@ export async function initDb(db: D1Database): Promise<void> {
         FOREIGN KEY (post_id) REFERENCES posts (id),
         FOREIGN KEY (user_id) REFERENCES users (id)
       );
-    `);
-    await db.exec(`
+
       CREATE TABLE IF NOT EXISTS post_likes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         post_id INTEGER NOT NULL,
@@ -51,8 +48,7 @@ export async function initDb(db: D1Database): Promise<void> {
         FOREIGN KEY (post_id) REFERENCES posts (id),
         FOREIGN KEY (user_id) REFERENCES users (id)
       );
-    `);
-    await db.exec(`
+
       CREATE TABLE IF NOT EXISTS comment_likes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         comment_id INTEGER NOT NULL,
@@ -62,8 +58,7 @@ export async function initDb(db: D1Database): Promise<void> {
         FOREIGN KEY (comment_id) REFERENCES comments (id),
         FOREIGN KEY (user_id) REFERENCES users (id)
       );
-    `);
-    await db.exec(`
+
       CREATE TABLE IF NOT EXISTS invite_codes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         code TEXT UNIQUE NOT NULL,
@@ -73,8 +68,7 @@ export async function initDb(db: D1Database): Promise<void> {
         used_at DATETIME,
         FOREIGN KEY (used_by_user_id) REFERENCES users (id)
       );
-    `);
-    await db.exec(`
+
       CREATE TABLE IF NOT EXISTS admin_accounts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
