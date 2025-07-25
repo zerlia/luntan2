@@ -39,7 +39,11 @@ app.onError((err, c) => {
   });
   
   if (err instanceof HTTPException) {
-    return err.getResponse();
+    // 確保返回JSON格式的錯誤響應
+    return c.json({ 
+      error: err.message || 'HTTP Exception',
+      status: err.status 
+    }, err.status);
   }
   
   return c.json({ 
@@ -84,5 +88,7 @@ app.get('/', (c) => {
 });
 
 export default app;
+
+
 
 
