@@ -71,19 +71,7 @@ app.use('/api/*', async (c, next) => {
 });
 
 // Initialize DB and Seed Data on first request (or when DB is empty)
-app.use('/api/*', async (c, next) => {
-  try {
-    await initDb(c.env.DB);
-    // Only seed data in development or if explicitly triggered
-    if (c.env.ENVIRONMENT === 'development') {
-      await seedData(c.env.DB);
-    }
-  } catch (e) {
-    console.error('Database initialization or seeding failed:', e);
-    throw new HTTPException(500, { message: 'Database initialization failed' });
-  }
-  await next();
-});
+
 
 // Routes
 app.route('/api/auth', authRoutes);
