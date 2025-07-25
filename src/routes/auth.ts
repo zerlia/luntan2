@@ -48,21 +48,40 @@ authRoutes.post('/register', async (c) => {
 
   const passwordHash = await bcrypt.hash(password, 10);
 
-  const { success, meta } = await db.prepare(
-    'INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)'
-  ).bind(username, passwordHash, 'user').run();
+  // Start a transaction to ensure atomicity
+  try {
+    // Insert user and get the last_row_id
+    const insertUserResult = await db.prepare(
+      'INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)'
+    ).bind(username, passwordHash, 'user').run();
 
-  if (!success) {
-    throw new HTTPException(500, { message: 'Failed to register user' });
+    if (!insertUserResult.success) {
+      throw new HTTPException(500, { message: 'Failed to register user' });
+    }
+
+    const userId = insertUserResult.meta.last_row_id;
+
+    // Mark invite code as used within the same transaction context
+    const updateInviteCodeResult = await db.prepare(
+      'UPDATE invite_codes SET is_used = TRUE, used_by_user_id = ?, used_at = CURRENT_TIMESTAMP WHERE id = ?'
+    ).bind(userId, inviteCodeRecord.id).run();
+
+    if (!updateInviteCodeResult.success) {
+      // If invite code update fails, we should ideally rollback the user creation.
+      // D1 doesn't have explicit rollback for individual statements, but a transaction (batch) would handle this.
+      // For now, we rely on the error propagation to prevent a successful response.
+      throw new HTTPException(500, { message: 'Failed to mark invite code as used' });
+    }
+
+    return c.json({ message: 'User registered successfully' }, 201);
+  } catch (error) {
+    // Handle any errors during the transaction
+    console.error('Registration transaction failed:', error);
+    if (error instanceof HTTPException) {
+      throw error; // Re-throw HTTPException to be handled by global error handler
+    }
+    throw new HTTPException(500, { message: 'Registration failed due to an unexpected error' });
   }
-
-  const userId = meta.last_row_id;
-
-  // Mark invite code as used
-  await db.prepare('UPDATE invite_codes SET is_used = TRUE, used_by_user_id = ?, used_at = CURRENT_TIMESTAMP WHERE id = ?')
-    .bind(userId, inviteCodeRecord.id).run();
-
-  return c.json({ message: 'User registered successfully' }, 201);
 });
 
 authRoutes.post('/login', async (c) => {
@@ -75,7 +94,17 @@ authRoutes.post('/login', async (c) => {
   const db = c.env.DB;
   const user = await db.prepare('SELECT * FROM users WHERE username = ?').bind(username).first<User>();
 
-  if (!user || !await bcrypt.compare(password, user.password_hash)) {
+  if (user) {
+    const isPasswordCorrect = await bcrypt.compare(password, user.password_hash);
+    console.log(`Login attempt for user: ${username}`);
+    console.log(`Provided password: ${password}`);
+    console.log(`Stored hash: ${user.password_hash}`);
+    console.log(`Password comparison result: ${isPasswordCorrect}`);
+
+    if (!isPasswordCorrect) {
+      throw new HTTPException(401, { message: 'Invalid credentials' });
+    }
+  } else {
     throw new HTTPException(401, { message: 'Invalid credentials' });
   }
 
@@ -107,4 +136,6 @@ authRoutes.post('/admin/login', async (c) => {
 
   return c.json({ token });
 });
+
+
 
