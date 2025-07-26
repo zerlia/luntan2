@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy import desc
-from datetime import datetime
 from src.models.user import db, Post, PostLike, Comment
 from src.routes.auth import require_auth
 
@@ -68,80 +67,6 @@ def get_post(post_id):
 
     except Exception as e:
         return jsonify({'error': f'獲取帖子失敗: {str(e)}'}), 500
-
-@posts_bp.route('/posts/<int:post_id>', methods=['PUT'])
-@require_auth
-def update_post(post_id):
-    try:
-        post = Post.query.get_or_404(post_id)
-        
-        # 檢查權限：只有作者或管理員可以編輯
-        if post.user_id != request.current_user.id and request.current_user.role != 'admin':
-            return jsonify({'error': '沒有權限編輯此帖子'}), 403
-        
-        data = request.get_json()
-        title = data.get('title', '').strip()
-        content = data.get('content', '').strip()
-
-        if not title or not content:
-            return jsonify({'error': '請填寫帖子標題和內容'}), 400
-
-        if len(title) > 200:
-            return jsonify({'error': '標題不能超過200個字符'}), 400
-
-        if len(content) > 10000:
-            return jsonify({'error': '內容不能超過10000個字符'}), 400
-
-        # 更新帖子
-        post.title = title
-        post.content = content
-        post.last_modified_at = datetime.utcnow()
-
-        db.session.commit()
-
-        return jsonify({
-            'message': '帖子更新成功',
-            'post': post.to_dict(request.current_user.id)
-        }), 200
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': f'更新帖子失敗: {str(e)}'}), 500
-
-@posts_bp.route('/posts/<int:post_id>', methods=['DELETE'])
-@require_auth
-def delete_post(post_id):
-    try:
-        post = Post.query.get_or_404(post_id)
-        
-        # 檢查權限：只有作者或管理員可以刪除
-        if post.user_id != request.current_user.id and request.current_user.role != 'admin':
-            return jsonify({'error': '沒有權限刪除此帖子'}), 403
-
-        # 刪除相關的點讚和評論（包括評論的點讚）
-        # 首先獲取所有相關評論的ID
-        comment_ids = [comment.id for comment in Comment.query.filter_by(post_id=post_id).all()]
-        
-        # 刪除評論的點讚
-        if comment_ids:
-            from src.models.user import CommentLike
-            CommentLike.query.filter(CommentLike.comment_id.in_(comment_ids)).delete(synchronize_session=False)
-        
-        # 刪除帖子的點讚
-        PostLike.query.filter_by(post_id=post_id).delete()
-        
-        # 刪除評論
-        Comment.query.filter_by(post_id=post_id).delete()
-        
-        # 刪除帖子
-        db.session.delete(post)
-        db.session.commit()
-
-        return jsonify({'message': '帖子刪除成功'}), 200
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': f'刪除帖子失敗: {str(e)}'}), 500
 
 @posts_bp.route('/posts/<int:post_id>/like', methods=['POST'])
 @require_auth
