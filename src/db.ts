@@ -117,7 +117,8 @@ export async function seedData(db: D1Database): Promise<void> {
     // Insert admin accounts
     const adminStmt = db.prepare('INSERT INTO admin_accounts (username, password) VALUES (?, ?)');
     for (const admin of adminAccounts) {
-      await adminStmt.bind(admin.username, admin.password).run();
+      const hashedPassword = await bcrypt.hash(admin.password, 10);
+      await adminStmt.bind(admin.username, hashedPassword).run();
     }
 
     console.log('Database seeded with invite codes and admin accounts');

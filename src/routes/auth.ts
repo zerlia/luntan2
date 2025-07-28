@@ -128,7 +128,7 @@ authRoutes.post('/admin/login', async (c) => {
   const db = c.env.DB;
   const adminAccount = await db.prepare('SELECT * FROM admin_accounts WHERE username = ?').bind(username).first();
 
-  if (!adminAccount || adminAccount.password !== password) { // For simplicity, direct password comparison for admin_accounts
+  if (!adminAccount || !await bcrypt.compare(password, adminAccount.password)) {
     throw new HTTPException(401, { message: 'Invalid admin credentials' });
   }
 
