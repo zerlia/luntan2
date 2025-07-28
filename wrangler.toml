@@ -4,7 +4,7 @@ compatibility_date = "2024-12-01"
 
 [vars]
 ENVIRONMENT = "production"
-CORS_ORIGIN = "https://forum.wwjpl.dpdns.org,https://forum1.pages.dev"
+CORS_ORIGIN = "https://forum1.pages.dev"
 JWT_SECRET = "FXjC$5FK[Oo}wBy8O.{g]}w?sXxJK,mT.GCiI1N.U_*8^Qj.!8?^&Q@mYh5u?ASZ"
 
 [[d1_databases]]

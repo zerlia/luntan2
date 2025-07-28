@@ -92,14 +92,7 @@ postRoutes.put('/:id', async (c) => {
     throw new HTTPException(500, { message: 'Failed to update post' });
   }
 
-  const updatedPost = await db.prepare(`
-    SELECT p.*, u.username 
-    FROM posts p 
-    JOIN users u ON p.user_id = u.id 
-    WHERE p.id = ?
-  `).bind(postId).first<Post>();
-
-  return c.json({ message: 'Post updated successfully', post: updatedPost });
+  return c.json({ message: 'Post updated successfully' });
 });
 
 // Delete a post (admin only)
@@ -199,6 +192,4 @@ postRoutes.post('/:id/comments', async (c) => {
 
   return c.json({ message: 'Comment created successfully' }, 201);
 });
-
-
 
